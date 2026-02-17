@@ -198,7 +198,11 @@ document.addEventListener('DOMContentLoaded', function () {
     chrome.storage.local.get(['history'], function (result) {
       const history = result.history || [];
       if (history.length === 0) {
-        alert(currentLanguage === 'zh' ? '尚無紀錄可匯出' : 'No history to export');
+        const t = {
+          zh: '尚無紀錄可匯出', en: 'No history to export', ja: 'エクスポートする履歴がありません',
+          ko: '내보낼 기록이 없습니다', fr: 'Aucun historique à exporter', de: 'Kein Verlauf zum Exportieren', es: 'No hay historial para exportar'
+        };
+        alert(t[currentLanguage] || t.en);
         return;
       }
       const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
@@ -213,7 +217,13 @@ document.addEventListener('DOMContentLoaded', function () {
 
   // 清空歷史紀錄
   clearHistoryBtn.addEventListener('click', function () {
-    const confirmMsg = currentLanguage === 'zh' ? '確定要清空所有歷史紀錄嗎？' : 'Are you sure you want to clear all history?';
+    const t = {
+      zh: '確定要清空所有歷史紀錄嗎？', en: 'Are you sure you want to clear all history?',
+      ja: '履歴をすべて消去してもよろしいですか？', ko: '모든 기록을 정말 지우시겠습니까?',
+      fr: 'Êtes-vous sûr de vouloir effacer tout l\'historique ?', de: 'Möchten Sie wirklich den gesamten Verlauf löschen?',
+      es: '¿Seguro que quieres borrar todo el historial?'
+    };
+    const confirmMsg = t[currentLanguage] || t.en;
     if (confirm(confirmMsg)) {
       chrome.storage.local.set({ history: [] }, function () {
         renderHistory();
@@ -244,37 +254,98 @@ document.addEventListener('DOMContentLoaded', function () {
     const apiKey = apiKeyInput.value.trim(); // 獲取並修剪 groq API Key
     if (apiKey) {
       chrome.storage.local.set({ apiKey: apiKey }); // 保存 groq API Key
-      alert(currentLanguage === 'zh' ? 'groq API Key 已保存' : 'groq API Key saved'); // 顯示保存成功訊息
+      const t = {
+        zh: 'groq API Key 已保存', en: 'groq API Key saved', ja: 'APIキーが保存されました',
+        ko: 'API 키 저장됨', fr: 'Clé API enregistrée', de: 'API Key gespeichert', es: 'Clave API guardada'
+      };
+      alert(t[currentLanguage] || t.en); // 顯示保存成功訊息
     }
   });
 
   // 更新語言相關的 UI 文本
   function updateLanguage() {
-    if (currentLanguage === 'zh') {
-      summarizeBtn.textContent = '總結'; // 更新總結按鈕文本
-      copyBtn.textContent = '複製'; // 更新複製按鈕文本
-      historyBtn.textContent = '歷史'; // 更新歷史按鈕文本
-      clearSummaryBtn.textContent = '清除'; // 更新清除按鈕文本
-      messageDiv.textContent = '請點擊"總結"按鈕開始總結當前頁面內容。'; // 更新提示訊息
-      loadingText.textContent = '正在思考...';
-      historyTitle.textContent = '最近總結';
-      // 更新風格選單文本
-      styleSelect.options[0].text = '標準摘要';
-      styleSelect.options[1].text = '簡明模式';
-      styleSelect.options[2].text = '深度解析';
-    } else {
-      summarizeBtn.textContent = 'Summarize'; // 更新總結按鈕文本
-      copyBtn.textContent = 'Copy'; // 更新複製按鈕文本
-      historyBtn.textContent = 'History'; // 更新歷史按鈕文本
-      clearSummaryBtn.textContent = 'Clear'; // 更新清除按鈕文本
-      messageDiv.textContent = 'Please click the "Summarize" button to start summarizing the current page content.'; // 更新提示訊息
-      loadingText.textContent = 'Thinking...';
-      historyTitle.textContent = 'Recent Summaries';
-      // 更新風格選單文本
-      styleSelect.options[0].text = 'Normal';
-      styleSelect.options[1].text = 'Concise';
-      styleSelect.options[2].text = 'Detailed';
-    }
+    const texts = {
+      zh: {
+        summarize: '總結', copy: '複製', history: '歷史', clear: '清除',
+        message: '請點擊"總結"按鈕開始總結當前頁面內容。',
+        loading: '正在思考...', historyTitle: '最近總結',
+        styles: ['標準摘要', '簡明模式', '深度解析'],
+        alertKey: '請先設置 groq API Key', keySaved: 'groq API Key 已保存',
+        error: '總結時發生錯誤', noHistory: '尚無歷史紀錄', confirmClear: '確定要清空所有歷史紀錄嗎？',
+        copied: '已複製', delete: '刪除', expanded: '內容擴展了', saved: '節省了', reading: '的閱讀量'
+      },
+      en: {
+        summarize: 'Sum', copy: 'Copy', history: 'Hist', clear: 'Clear',
+        message: 'Click "Sum" to start.',
+        loading: 'Thinking...', historyTitle: 'Recent Summaries',
+        styles: ['Normal', 'Concise', 'Detailed'],
+        alertKey: 'Please set groq API Key first', keySaved: 'groq API Key saved',
+        error: 'Error occurred', noHistory: 'No history', confirmClear: 'Clear all history?',
+        copied: 'Copied', delete: 'Delete', expanded: 'Content expanded', saved: 'Saved', reading: 'of reading'
+      },
+      ja: {
+        summarize: '要約', copy: '複製', history: '履歴', clear: '消去',
+        message: '「要約」ボタンをクリックして開始します。',
+        loading: '思考中...', historyTitle: '最近の要約',
+        styles: ['標準', '簡潔', '詳細'],
+        alertKey: 'groq APIキーを設定してください', keySaved: 'APIキーが保存されました',
+        error: 'エラーが発生しました', noHistory: '履歴なし', confirmClear: '履歴をすべて消去しますか？',
+        copied: '複製完了', delete: '削除', expanded: '内容が拡張されました', saved: '読書量を', reading: '節約しました'
+      },
+      ko: {
+        summarize: '요약', copy: '복사', history: '기록', clear: '지우기',
+        message: '시작하려면 "요약" 버튼을 클릭하세요.',
+        loading: '생각 중...', historyTitle: '최근 요약',
+        styles: ['표준', '간결', '상세'],
+        alertKey: 'groq API 키를 먼저 설정하세요', keySaved: 'API 키 저장됨',
+        error: '오류가 발생했습니다', noHistory: '기록 없음', confirmClear: '모든 기록을 지우시겠습니까?',
+        copied: '복사됨', delete: '삭제', expanded: '내용이 확장되었습니다', saved: '절약됨', reading: '독서량'
+      },
+      fr: {
+        summarize: 'Résumer', copy: 'Copier', history: 'Hist.', clear: 'Effacer',
+        message: 'Cliquez sur "Résumer" pour commencer.',
+        loading: 'Penser...', historyTitle: 'Résumés récents',
+        styles: ['Normal', 'Concis', 'Détaillé'],
+        alertKey: 'Veuillez définir la clé API groq', keySaved: 'Clé API enregistrée',
+        error: 'Une erreur est survenue', noHistory: 'Aucun historique', confirmClear: 'Effacer tout l\'historique ?',
+        copied: 'Copié', delete: 'Supprimer', expanded: 'Contenu étendu', saved: 'Économisé', reading: 'de lecture'
+      },
+      de: {
+        summarize: 'Resümee', copy: 'Kopieren', history: 'Verlauf', clear: 'Leeren',
+        message: 'Klicken Sie auf "Resümee", um zu beginnen.',
+        loading: 'Denken...', historyTitle: 'Letzte Zusammenfassungen',
+        styles: ['Normal', 'Prägnant', 'Detailliert'],
+        alertKey: 'Bitte setzen Sie zuerst den groq API Key', keySaved: 'API Key gespeichert',
+        error: 'Ein Fehler ist aufgetreten', noHistory: 'Kein Verlauf', confirmClear: 'Verlauf leeren?',
+        copied: 'Kopiert', delete: 'Löschen', expanded: 'Inhalt erweitert', saved: 'Gespart', reading: 'des Lesens'
+      },
+      es: {
+        summarize: 'Resumir', copy: 'Copiar', history: 'Hist.', clear: 'Borrar',
+        message: 'Haga clic en "Resumir" para comenzar.',
+        loading: 'Pensando...', historyTitle: 'Resúmenes recientes',
+        styles: ['Normal', 'Conciso', 'Detallado'],
+        alertKey: 'Configure primero la clave API groq', keySaved: 'Clave API guardada',
+        error: 'Ocurrió un error', noHistory: 'Sin historial', confirmClear: '¿Borrar todo el historial?',
+        copied: 'Copiado', delete: 'Borrar', expanded: 'Contenido expandido', saved: 'Ahorrado', reading: 'de lectura'
+      }
+    };
+
+    const t = texts[currentLanguage] || texts.en;
+
+    summarizeBtn.textContent = t.summarize;
+    copyBtn.textContent = t.copy;
+    historyBtn.textContent = t.history;
+    clearSummaryBtn.textContent = t.clear;
+    messageDiv.textContent = t.message;
+    loadingText.textContent = t.loading;
+    historyTitle.textContent = t.historyTitle;
+
+    styleSelect.options[0].text = t.styles[0];
+    styleSelect.options[1].text = t.styles[1];
+    styleSelect.options[2].text = t.styles[2];
+
+    // 更新 Placeholder (如果有的話)
+    apiKeyInput.placeholder = 'Groq API Key';
   }
 
   // 總結功能 (支援傳入特定內容)
@@ -320,33 +391,70 @@ document.addEventListener('DOMContentLoaded', function () {
       });
 
       if (!apiKey) {
-        alert(currentLanguage === 'zh' ? '請先設置 groq API Key' : 'Please set the groq API Key first'); // 提示設置 groq API Key
+        const t = {
+          zh: '請先設置 groq API Key', en: 'Please set the groq API Key first',
+          ja: '最初にgroq APIキーを設定してください', ko: '먼저 groq API 키를 설정하세요',
+          fr: 'Veuillez d\'abord définir la clé API groq', de: 'Bitte setzen Sie zuerst den groq API Key',
+          es: 'Por favor, configure primero la clave API groq'
+        };
+        alert(t[currentLanguage] || t.en); // 提示設置 groq API Key
         summarizing = false; // 重置總結狀態
         summarizeBtn.disabled = false; // 啟用總結按鈕
         return;
       }
 
       // 根據語言與風格生成提示文本
+      // 根據語言與風格生成提示文本
       let prompt = '';
       if (currentLanguage === 'zh') {
         prompt = `請用繁體中文總結以下內容：\n\n`;
-        if (currentStyle === 'concise') {
-          prompt += `請以「簡明模式」總結，只提供 3 個核心重點（使用 bullet points）。\n\n`;
-        } else if (currentStyle === 'detailed') {
-          prompt += `請以「深度解析」模式總結，包含詳細的背景、核心觀點、具體細節與結論，並使用適當的標題。\n\n`;
-        } else {
-          prompt += `請以「標準摘要」模式總結，提供整體的概要與重要細節。\n\n`;
-        }
+      } else if (currentLanguage === 'ja') {
+        prompt = `以下の内容を日本語で要約してください：\n\n`;
+      } else if (currentLanguage === 'ko') {
+        prompt = `다음 내용을 한국어로 요약해 주세요:\n\n`;
+      } else if (currentLanguage === 'fr') {
+        prompt = `Veuillez résumer le contenu suivant en français :\n\n`;
+      } else if (currentLanguage === 'de') {
+        prompt = `Bitte fassen Sie den folgenden Inhalt auf Deutsch zusammen:\n\n`;
+      } else if (currentLanguage === 'es') {
+        prompt = `Por favor, resuma el siguiente contenido en español:\n\n`;
       } else {
         prompt = `Please summarize the following content in English:\n\n`;
-        if (currentStyle === 'concise') {
-          prompt += `Use "Concise Mode", providing only 3 core key points (using bullet points).\n\n`;
-        } else if (currentStyle === 'detailed') {
-          prompt += `Use "Detailed Mode", including detailed background, core arguments, specific details, and conclusion, categorized with clear headings.\n\n`;
-        } else {
-          prompt += `Use "Normal Mode", providing a general overview and important details.\n\n`;
-        }
       }
+
+      const stylePrompts = {
+        concise: {
+          zh: `請以「簡明模式」總結，只提供 3 個核心重點（使用 bullet points）。\n\n`,
+          en: `Use "Concise Mode", providing only 3 core key points (using bullet points).\n\n`,
+          ja: `「簡潔モード」を使用し、3つの重要なポイントのみを箇条書きで提供してください。\n\n`,
+          ko: `핵심 포인트 3개만 글머리 기호를 사용하여 "간결 모드"로 요약해 주세요.\n\n`,
+          fr: `Utilisez le "Mode Concis", en fournissant seulement 3 points clés (avec des puces).\n\n`,
+          de: `Verwenden Sie den "Prägnanten Modus" und geben Sie nur 3 Kernpunkte an (mit Aufzählungszeichen).\n\n`,
+          es: `Use el "Modo Conciso", proporcionando solo 3 puntos clave (con viñetas).\n\n`
+        },
+        detailed: {
+          zh: `請以「深度解析」模式總結，包含詳細的背景、核心觀點、具體細節與結論，並使用適當的標題。\n\n`,
+          en: `Use "Detailed Mode", including detailed background, core arguments, specific details, and conclusion, categorized with clear headings.\n\n`,
+          ja: `「詳細モード」を使用し、詳細な背景、核心的な議論、具体的な詳細、結論を含め、明確な見出しで分類してください。\n\n`,
+          ko: `상세한 배경, 핵심 주장이 포함된 "상세 모드"를 사용하여 적절한 제목과 함께 요약해 주세요.\n\n`,
+          fr: `Utilisez le "Mode Détaillé", incluant le contexte détaillé, les arguments principaux, les détails spécifiques et la conclusion, avec des titres clairs.\n\n`,
+          de: `Verwenden Sie den "Detaillierten Modus" mit ausführlichem Hintergrund, Kernargumenten, spezifischen Details und Schlussfolgerungen, kategorisiert mit klaren Überschriften.\n\n`,
+          es: `Use el "Modo Detallado", incluyendo antecedentes detallados, argumentos centrales, detalles específicos y conclusiones, con encabezados claros.\n\n`
+        },
+        normal: {
+          zh: `請以「標準摘要」模式總結，提供整體的概要與重要細節。\n\n`,
+          en: `Use "Normal Mode", providing a general overview and important details.\n\n`,
+          ja: `「標準モード」を使用し、全体的な概要と重要な詳細を提供してください。\n\n`,
+          ko: `전체적인 개요와 중요한 세부 사항을 포함하여 "표준 모드"로 요약해 주세요.\n\n`,
+          fr: `Utilisez le "Mode Normal", en fournissant un aperçu général et des détails importants.\n\n`,
+          de: `Verwenden Sie den "Normalen Modus" und geben Sie einen allgemeinen Überblick sowie wichtige Details.\n\n`,
+          es: `Use el "Modo Normal", proporcionando una visión general y detalles importantes.\n\n`
+        }
+      };
+
+      const langKey = (['zh', 'en', 'ja', 'ko', 'fr', 'de', 'es'].includes(currentLanguage)) ? currentLanguage : 'en';
+      prompt += stylePrompts[currentStyle][langKey] || stylePrompts[currentStyle]['en'];
+
       prompt += pageContent;
 
       // 向 API 發送請求以獲取總結
@@ -407,6 +515,10 @@ document.addEventListener('DOMContentLoaded', function () {
           // 內容反而變多了
           if (currentLanguage === 'zh') {
             statsText.textContent = `📝 內容擴展了 (原 ${originalLen} → 現 ${summaryLen} 字)`;
+          } else if (currentLanguage === 'ja') {
+            statsText.textContent = `📝 内容が拡張されました (元 ${originalLen} → 現 ${summaryLen} 文字)`;
+          } else if (currentLanguage === 'ko') {
+            statsText.textContent = `📝 내용이 확장되었습니다 (원문 ${originalLen} → 요약 ${summaryLen} 자)`;
           } else {
             statsText.textContent = `📝 Content expanded (${originalLen} → ${summaryLen} chars)`;
           }
@@ -414,6 +526,10 @@ document.addEventListener('DOMContentLoaded', function () {
           const savedPercent = Math.round(((originalLen - summaryLen) / originalLen) * 100);
           if (currentLanguage === 'zh') {
             statsText.textContent = `⚡️ 節省了 ${savedPercent}% 的閱讀量 (${originalLen} → ${summaryLen} 字)`;
+          } else if (currentLanguage === 'ja') {
+            statsText.textContent = `⚡️ 読書量を ${savedPercent}% 節約しました (${originalLen} → ${summaryLen} 文字)`;
+          } else if (currentLanguage === 'ko') {
+            statsText.textContent = `⚡️ 독서량 ${savedPercent}% 절약됨 (${originalLen} → ${summaryLen} 자)`;
           } else {
             statsText.textContent = `⚡️ Saved ${savedPercent}% of reading (${originalLen} → ${summaryLen} chars)`;
           }
@@ -425,7 +541,13 @@ document.addEventListener('DOMContentLoaded', function () {
       saveToHistory(rawSummary, tabTitle, tabUrl);
     } catch (error) {
       console.error('Error:', error);
-      summaryDiv.textContent = currentLanguage === 'zh' ? '總結時發生錯誤' : 'An error occurred during summarization'; // 顯示錯誤訊息
+      const t = {
+        zh: '總結時發生錯誤', en: 'An error occurred during summarization',
+        ja: '要約中にエラーが発生しました', ko: '요약 중 오류가 발생했습니다',
+        fr: 'Une erreur est survenue lors du résumé', de: 'Ein Fehler ist während der Zusammenfassung aufgetreten',
+        es: 'Ocurrió un error durante el resumen'
+      };
+      summaryDiv.textContent = t[currentLanguage] || t.en; // 顯示錯誤訊息
     } finally {
       summarizing = false; // 重置總結狀態
       summarizeBtn.disabled = false; // 啟用總結按鈕
@@ -460,7 +582,11 @@ document.addEventListener('DOMContentLoaded', function () {
       const history = result.history || [];
       historyList.innerHTML = '';
       if (history.length === 0) {
-        historyList.innerHTML = `<div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">${currentLanguage === 'zh' ? '尚無歷史紀錄' : 'No history yet'}</div>`;
+        const t = {
+          zh: '尚無歷史紀錄', en: 'No history yet', ja: '履歴はまだありません',
+          ko: '기록이 없습니다', fr: 'Pas encore d\'historique', de: 'Noch kein Verlauf', es: 'Todavía no hay historial'
+        };
+        historyList.innerHTML = `<div style="padding: 20px; text-align: center; color: #999; font-size: 12px;">${t[currentLanguage] || t.en}</div>`;
         return;
       }
 
@@ -475,7 +601,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 <span>${item.date}</span>
               </div>
             </div>
-            <button class="delete-item-btn" data-index="${index}" title="${currentLanguage === 'zh' ? '刪除' : 'Delete'}" style="background:none; border:none; padding: 4px; cursor: pointer; opacity: 0.5;">✕</button>
+            <button class="delete-item-btn" data-index="${index}" title="${currentLanguage === 'zh' ? '刪除' : (currentLanguage === 'ja' ? '削除' : 'Delete')}" style="background:none; border:none; padding: 4px; cursor: pointer; opacity: 0.5;">✕</button>
           </div>
         `;
 
