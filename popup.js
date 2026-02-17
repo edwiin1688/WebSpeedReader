@@ -115,6 +115,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     // 如果有背景選取的內容，優先處理
+    // 如果有背景選取的內容，優先處理
     if (result.pendingSelection) {
       // 來自右鍵選單的內容
       const selectedText = result.pendingSelection;
@@ -124,8 +125,22 @@ document.addEventListener('DOMContentLoaded', function () {
       // 自動觸發總結
       summarize(selectedText, selectedTitle);
     } else if (result.summary) {
-      rawSummary = result.summary;
-      summaryDiv.innerHTML = marked.parse(rawSummary); // 顯示之前的總結（渲染後）
+      // 只有當前頁面 URL 與緩存的 summaryUrl 相符時，才顯示緩存
+      const [currentTab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      if (currentTab && currentTab.url === result.summaryUrl) {
+        rawSummary = result.summary;
+        summaryDiv.innerHTML = marked.parse(rawSummary); // 顯示之前的總結（渲染後）
+        // 顯示統計（如果有的話）
+        if (result.savedStats) {
+          statsText.textContent = result.savedStats;
+          statsDiv.classList.remove('hidden');
+        }
+      } else {
+        // 如果 URL 不匹配，清除舊的摘要顯示
+        chrome.storage.local.remove(['summary', 'summaryUrl', 'savedStats']);
+        summaryDiv.innerHTML = '';
+        statsDiv.classList.add('hidden');
+      }
     }
   });
 
@@ -671,8 +686,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
       }
 
-      // 保存總結結果
-      chrome.storage.local.set({ summary: rawSummary });
+
 
       // 計算並顯示統計資訊
       const originalText = String(pageContent || "");
@@ -705,6 +719,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         statsDiv.classList.remove('hidden');
       }
+
+      // 保存總結結果與當前 URL (防止跨頁顯示錯誤)
+      chrome.storage.local.set({
+        summary: rawSummary,
+        summaryUrl: tabUrl,
+        savedStats: statsText.textContent
+      });
 
       // 儲存到歷史紀錄
       saveToHistory(rawSummary, tabTitle, tabUrl);
