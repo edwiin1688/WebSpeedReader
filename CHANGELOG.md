@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **版本號顯示**: 在彈窗底部自動顯示來自 `manifest.json` 的版本號，方便開發與核對。
 - **右鍵選單總結**: 新增右鍵選單 `總結選取內容`，選取文字後可快速匯入彈窗進行總結。
 - **歷史紀錄 (History)**: 支援保存最近 10 次總結，包含網頁標題與時間戳記，點擊即可重載內容。
 - **自定義總結風格**: 新增選擇器，支援「標準摘要」、「簡明模式 (3個重點)」與「深度解析」三種風格。

@@ -26,6 +26,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
   let rawSummary = ''; // 儲存原始 Markdown 文本
 
+  // 顯示版本號
+  const versionNumber = document.getElementById('version-number');
+  if (versionNumber) {
+    versionNumber.textContent = chrome.runtime.getManifest().version;
+  }
+
   // 載入之前的狀態
   chrome.storage.local.get(['language', 'summary', 'apiKey', 'style', 'pendingSelection', 'pendingTitle'], function (result) {
     if (result.language) {

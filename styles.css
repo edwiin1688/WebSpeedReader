@@ -302,3 +302,12 @@ select:hover {
 #history-list::-webkit-scrollbar-thumb:hover {
   background: #bbb;
 }
+
+/* 版本號顯示樣式 */
+#version-info {
+  text-align: right;
+  font-size: 10px;
+  color: #ccc;
+  margin-top: 10px;
+  font-family: monospace;
+}
