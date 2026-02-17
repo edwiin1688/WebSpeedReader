@@ -1,15 +1,23 @@
 let currentLanguage = 'zh'; // 預設語言為繁體中文
+let currentStyle = 'normal'; // 預設總結風格為標準摘要
 let summarizing = false; // 標記是否正在進行總結
 
 document.addEventListener('DOMContentLoaded', function () {
   // 獲取 DOM 元素
   const languageSelect = document.getElementById('language-select');
+  const styleSelect = document.getElementById('style-select'); // 新增
   const summarizeBtn = document.getElementById('summarize-btn');
+  const copyBtn = document.getElementById('copy-btn');
   const clearSummaryBtn = document.getElementById('clear-summary-btn'); // 新增
   const messageDiv = document.getElementById('message');
   const summaryDiv = document.getElementById('summary');
   const apiKeyInput = document.getElementById('api-key');
+  const apiKeyHint = document.getElementById('api-key-hint');
   const saveApiKeyBtn = document.getElementById('save-api-key');
+  const loadingDiv = document.getElementById('loading');
+  const loadingText = document.getElementById('loading-text');
+
+  let rawSummary = ''; // 儲存原始 Markdown 文本
 
   // 載入之前的狀態
   chrome.storage.local.get(['language', 'summary', 'apiKey'], function (result) {
@@ -17,13 +25,33 @@ document.addEventListener('DOMContentLoaded', function () {
       currentLanguage = result.language; // 設定當前語言
       languageSelect.value = currentLanguage; // 更新語言選擇器的值
     }
+    if (result.style) {
+      currentStyle = result.style; // 設定當前風格
+      styleSelect.value = currentStyle; // 更新風格選擇器的值
+    }
     if (result.summary) {
-      summaryDiv.textContent = result.summary; // 顯示之前的總結
+      rawSummary = result.summary;
+      summaryDiv.innerHTML = marked.parse(rawSummary); // 顯示之前的總結（渲染後）
     }
     if (result.apiKey) {
       apiKeyInput.value = result.apiKey; // 顯示之前保存的 groq API Key
+      updateApiKeyHint(result.apiKey);
     }
     updateLanguage(); // 更新語言相關的 UI 文本
+  });
+
+  // 更新 API Key 提示（最後三碼）
+  function updateApiKeyHint(val) {
+    if (val && val.length > 3) {
+      apiKeyHint.textContent = '...' + val.slice(-3);
+    } else {
+      apiKeyHint.textContent = '';
+    }
+  }
+
+  // API Key 輸入監聽
+  apiKeyInput.addEventListener('input', function () {
+    updateApiKeyHint(this.value);
   });
 
   // 語言選擇器變更事件
@@ -33,13 +61,34 @@ document.addEventListener('DOMContentLoaded', function () {
     updateLanguage(); // 更新語言相關的 UI 文本
   });
 
+  // 風格選擇器變更事件
+  styleSelect.addEventListener('change', function () {
+    currentStyle = this.value; // 更新當前風格
+    chrome.storage.local.set({ style: currentStyle }); // 保存風格設定
+    updateLanguage(); // 更新相關 UI (如果需要)
+  });
+
   // 總結按鈕點擊事件
   summarizeBtn.addEventListener('click', summarize);
 
   // 清除按鈕點擊事件
   clearSummaryBtn.addEventListener('click', function () {
-    summaryDiv.textContent = ''; // 清空總結區域
+    rawSummary = '';
+    summaryDiv.innerHTML = ''; // 清空總結區域
     chrome.storage.local.remove('summary'); // 移除保存的總結
+  });
+
+  // 複製按鈕點擊事件
+  copyBtn.addEventListener('click', function () {
+    if (rawSummary) {
+      navigator.clipboard.writeText(rawSummary).then(() => {
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = currentLanguage === 'zh' ? '已複製' : 'Copied';
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+        }, 2000);
+      });
+    }
   });
 
   // 保存 groq API Key 按鈕點擊事件
@@ -55,12 +104,24 @@ document.addEventListener('DOMContentLoaded', function () {
   function updateLanguage() {
     if (currentLanguage === 'zh') {
       summarizeBtn.textContent = '總結'; // 更新總結按鈕文本
+      copyBtn.textContent = '複製'; // 更新複製按鈕文本
       clearSummaryBtn.textContent = '清除'; // 更新清除按鈕文本
       messageDiv.textContent = '請點擊"總結"按鈕開始總結當前頁面內容。'; // 更新提示訊息
+      loadingText.textContent = '正在思考...';
+      // 更新風格選單文本
+      styleSelect.options[0].text = '標準摘要';
+      styleSelect.options[1].text = '簡明模式';
+      styleSelect.options[2].text = '深度解析';
     } else {
       summarizeBtn.textContent = 'Summarize'; // 更新總結按鈕文本
+      copyBtn.textContent = 'Copy'; // 更新複製按鈕文本
       clearSummaryBtn.textContent = 'Clear'; // 更新清除按鈕文本
       messageDiv.textContent = 'Please click the "Summarize" button to start summarizing the current page content.'; // 更新提示訊息
+      loadingText.textContent = 'Thinking...';
+      // 更新風格選單文本
+      styleSelect.options[0].text = 'Normal';
+      styleSelect.options[1].text = 'Concise';
+      styleSelect.options[2].text = 'Detailed';
     }
   }
 
@@ -69,6 +130,8 @@ document.addEventListener('DOMContentLoaded', function () {
     if (summarizing) return; // 如果正在總結，則返回
     summarizing = true; // 標記為正在總結
     summarizeBtn.disabled = true; // 禁用總結按鈕
+    summaryDiv.innerHTML = ''; // 清空之前的總結
+    rawSummary = ''; // 重置原始文本
 
     try {
       // 獲取當前活動標籤頁
@@ -77,7 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // 確認內容腳本已加載
       await chrome.scripting.executeScript({
         target: { tabId: tab.id },
-        files: ['content.js']
+        files: ['readability.js', 'content.js']
       });
 
       // 向內容腳本發送訊息以獲取頁面內容
@@ -98,10 +161,28 @@ document.addEventListener('DOMContentLoaded', function () {
         return;
       }
 
-      // 根據語言生成提示文本
-      const prompt = currentLanguage === 'zh'
-        ? `請用繁體中文總結以下內容:\n\n${pageContent}`
-        : `Please summarize the following content in English:\n\n${pageContent}`;
+      // 根據語言與風格生成提示文本
+      let prompt = '';
+      if (currentLanguage === 'zh') {
+        prompt = `請用繁體中文總結以下內容：\n\n`;
+        if (currentStyle === 'concise') {
+          prompt += `請以「簡明模式」總結，只提供 3 個核心重點（使用 bullet points）。\n\n`;
+        } else if (currentStyle === 'detailed') {
+          prompt += `請以「深度解析」模式總結，包含詳細的背景、核心觀點、具體細節與結論，並使用適當的標題。\n\n`;
+        } else {
+          prompt += `請以「標準摘要」模式總結，提供整體的概要與重要細節。\n\n`;
+        }
+      } else {
+        prompt = `Please summarize the following content in English:\n\n`;
+        if (currentStyle === 'concise') {
+          prompt += `Use "Concise Mode", providing only 3 core key points (using bullet points).\n\n`;
+        } else if (currentStyle === 'detailed') {
+          prompt += `Use "Detailed Mode", including detailed background, core arguments, specific details, and conclusion, categorized with clear headings.\n\n`;
+        } else {
+          prompt += `Use "Normal Mode", providing a general overview and important details.\n\n`;
+        }
+      }
+      prompt += pageContent;
 
       // 向 API 發送請求以獲取總結
       const apiResponse = await fetch('https://api.groq.com/openai/v1/chat/completions', {
@@ -119,7 +200,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
       const reader = apiResponse.body.getReader();
       const decoder = new TextDecoder("utf-8");
-      summaryDiv.textContent = ''; // 清空總結區域
+      loadingDiv.classList.remove('hidden'); // 顯示載入動畫
 
       // 逐行讀取 API 響應
       while (true) {
@@ -130,7 +211,10 @@ document.addEventListener('DOMContentLoaded', function () {
         const parsedLines = lines
           .map(line => line.replace(/^data: /, '').trim())
           .filter(line => line !== '' && line !== '[DONE]')
-          .map(line => JSON.parse(line));
+          .map(line => {
+            try { return JSON.parse(line); } catch (e) { return null; }
+          })
+          .filter(line => line !== null);
 
         // 更新總結區域的內容
         for (const parsedLine of parsedLines) {
@@ -138,19 +222,22 @@ document.addEventListener('DOMContentLoaded', function () {
           const { delta } = choices[0];
           const { content } = delta;
           if (content) {
-            summaryDiv.textContent += content;
+            loadingDiv.classList.add('hidden'); // 開始收到內容後，隱藏載入動畫
+            rawSummary += content;
+            summaryDiv.innerHTML = marked.parse(rawSummary);
           }
         }
       }
 
       // 保存總結結果
-      chrome.storage.local.set({ summary: summaryDiv.textContent });
+      chrome.storage.local.set({ summary: rawSummary });
     } catch (error) {
       console.error('Error:', error);
       summaryDiv.textContent = currentLanguage === 'zh' ? '總結時發生錯誤' : 'An error occurred during summarization'; // 顯示錯誤訊息
     } finally {
       summarizing = false; // 重置總結狀態
       summarizeBtn.disabled = false; // 啟用總結按鈕
+      loadingDiv.classList.add('hidden'); // 確保隱藏載入動畫
     }
   }
 });

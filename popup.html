@@ -1,11 +1,13 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <meta charset="UTF-8">
   <title>網頁快速閱讀助手</title>
   <!-- 引入樣式表 -->
   <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
+
 <body>
   <div id="app">
     <div class="header">
@@ -14,23 +16,40 @@
         <option value="zh">繁體中文</option>
         <option value="en">English</option>
       </select>
+      <!-- 總結風格選擇器 -->
+      <select id="style-select">
+        <option value="normal">標準摘要</option>
+        <option value="concise">簡明模式</option>
+        <option value="detailed">深度解析</option>
+      </select>
       <!-- 總結按鈕 -->
       <button id="summarize-btn" class="btn">總結</button>
+      <!-- 複製按鈕 -->
+      <button id="copy-btn" class="btn">複製</button>
       <!-- 清除按鈕 -->
       <button id="clear-summary-btn" class="btn">清除</button>
+    </div>
+    <div id="api-key-input">
+      <!-- groq API Key 輸入框 -->
+      <input type="password" id="api-key" placeholder="Groq API Key">
+      <span id="api-key-hint"></span>
+      <!-- 保存 groq API Key 按鈕 -->
+      <button id="save-api-key" class="btn">保存</button>
     </div>
     <!-- 提示訊息區域 -->
     <div id="message">請點擊"總結"按鈕開始總結當前頁面內容。</div>
     <!-- 總結結果顯示區域 -->
     <div id="summary"></div>
-    <div id="api-key-input">
-      <!-- groq API Key 輸入框 -->
-      <input type="text" id="api-key" placeholder="請輸入 groq API Key">
-      <!-- 保存 groq API Key 按鈕 -->
-      <button id="save-api-key" class="btn">保存</button>
+    <!-- 載入動畫區域 -->
+    <div id="loading" class="hidden">
+      <div class="spinner"></div>
+      <span id="loading-text">正在思考...</span>
     </div>
   </div>
+  <!-- 引入 Markdown 解析庫 -->
+  <script src="marked.min.js"></script>
   <!-- 引入 JavaScript 文件 -->
   <script src="popup.js"></script>
 </body>
+
 </html>

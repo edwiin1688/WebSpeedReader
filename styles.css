@@ -1,21 +1,44 @@
-/* 設定 body 元素的寬度、內邊距和字體 */
 body {
-  width: 300px;
-  padding: 10px;
-  font-family: Arial, sans-serif;
+  width: 350px;
+  padding: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  color: #333;
 }
 
 /* 設定 header 區域的排版和底部邊距 */
 .header {
   display: flex;
+  gap: 6px;
   justify-content: space-between;
-  margin-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+select {
+  padding: 4px 6px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+  font-size: 12px;
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+select:hover {
+  border-color: #4CAF50;
 }
 
 /* 設定按鈕的內邊距和游標樣式 */
 .btn {
-  padding: 5px 10px;
+  padding: 6px 10px;
   cursor: pointer;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.btn:hover {
+  opacity: 0.9;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* 設定 summarize 按鈕的背景色、文字顏色和邊框 */
@@ -29,6 +52,7 @@ body {
 #summarize-btn:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
+  box-shadow: none;
 }
 
 /* 設定 message 區域的底部邊距 */
@@ -38,24 +62,139 @@ body {
 
 /* 設定 summary 區域的換行和單詞換行樣式 */
 #summary {
-  white-space: pre-wrap;
   word-wrap: break-word;
+  line-height: 1.6;
+  font-size: 14px;
 }
 
-/* 設定 groq API Key 輸入區域的頂部邊距 */
+#summary h1,
+#summary h2,
+#summary h3 {
+  margin-top: 1em;
+  margin-bottom: 0.5em;
+}
+
+#summary ul,
+#summary ol {
+  padding-left: 20px;
+}
+
+#summary p {
+  margin-bottom: 0.8em;
+}
+
+#summary code {
+  background-color: #f4f4f4;
+  padding: 2px 4px;
+  border-radius: 4px;
+  font-family: monospace;
+}
+
+/* 設定 groq API Key 輸入區域的頂部邊距與佈局 */
 #api-key-input {
-  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #eee;
 }
 
-/* 設定 groq API Key 輸入框的寬度和右邊距 */
+/* 設定 groq API Key 輸入框的寬度和樣式 */
 #api-key {
-  width: 200px;
+  flex-grow: 1;
   margin-right: 5px;
+  padding: 4px 8px;
+  font-size: 11px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+}
+
+#api-key-hint {
+  font-size: 10px;
+  color: #666;
+  margin-right: 5px;
+  line-height: 24px;
+}
+
+#save-api-key {
+  padding: 4px 8px;
+  background-color: #f0f0f0;
+  color: #333;
+  border: 1px solid #ddd;
+  border-radius: 4px;
 }
 
 /* 設定 clear 按鈕的背景色、文字顏色和邊框 */
 #clear-summary-btn {
   background-color: #f44336;
+  color: white;
+  border: none;
+}
+
+/* 隱藏元素 */
+.hidden {
+  display: none !important;
+}
+
+/* 載入動畫樣式 */
+#loading {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid #f3f3f3;
+  border-top: 2px solid #4CAF50;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-right: 8px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/* 總結區域打字效果輔助樣式 */
+#summary {
+  position: relative;
+}
+
+#summary:not(:empty)::after {
+  content: "▊";
+  display: inline-block;
+  vertical-align: middle;
+  animation: blink 1s step-end infinite;
+  color: #4CAF50;
+  margin-left: 2px;
+}
+
+@keyframes blink {
+
+  from,
+  to {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* 設定 copy 按鈕的背景色、文字顏色和邊框 */
+#copy-btn {
+  background-color: #2196F3;
   color: white;
   border: none;
 }
