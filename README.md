@@ -2,7 +2,7 @@
 
 ![總結](./images/總結DEMO.gif)
 
-**WebSpeedReader** 是一款專為效率控設計的 Chrome 擴充套件！⚡️ 它透過 [Groq](https://console.groq.com/) 驅動的高速 AI 模型（如 `openai/gpt-oss-20b`），在幾秒鐘內為您讀完長篇大論，並精煉出最有價值的重點。
+**WebSpeedReader** 是一款專為效率控設計的 Chrome 擴充套件！⚡️ 它透過 [Groq](https://console.groq.com/) 驅動的多款高速 AI 模型，在幾秒鐘內為您讀完長篇大論，並精煉出最有價值的重點。
 
 ---
 
@@ -13,7 +13,10 @@
 - ⚡️ **極速生成 (Streaming API)**：採用流式傳輸技術，看著 AI 實時「思考」並逐行輸出，不再枯坐等待。
 - 🔒 **隱私防護 (Security First)**：API Key 採用加密輸入顯示，並提供尾碼校驗功能，保障您的隱私與安全。
 - 📋 **一鍵複製**：生成的總結內容支援 Markdown 一鍵複製，方便直接存入筆記軟體。
+- 🤖 **多模型自由切換**：提供多款 Groq 高效能模型（GPT-OSS, Llama 3.3, Mixtral 等）供您選擇。
 - 🌐 **雙語支援**：支援繁體中文與英文總結，跨國資訊閱讀零障礙。
+- 🌓 **主題與風格自訂**：內建深色模式與三種總結風格（簡明、標準、深度）。
+- 📜 **歷史紀錄**：自動保存最近 10 次總結，支援離線回看與快速重載。
 
 ---
 
@@ -40,9 +43,24 @@
 ![總結](./images/總結DEMO.gif)
 
 ### 📝 專案資訊
-- **AI 模型**: openai/gpt-oss-120b (via Groq API)
+- **AI 模型**: 多款 Groq AI 模型 (可於介面自選)
 - **核心庫**: Readability.js, Marked.js
 - **開發者**: chiisen
+
+---
+
+## 🤖 AI Agent 指引
+
+本專案包含 `.agent/GUIDELINES.md` 檔案，這是提供 AI 開發助手（如 opencode）使用的專案開發規範。
+
+**用途**：
+- 定義專案技術棧與開發原則
+- 確保 AI 生成之程式碼符合專案安全政策（CSP）
+- 規範 Git Commit 與 CHANGELOG 格式
+- 明確完工定義 (DoD) 以確保品質
+
+> [!IMPORTANT]
+> 若使用 opencode 或其他 AI 助手協助開發，請參考 `.agent/GUIDELINES.md` 以確保遵循專案規範。
 
 ---
 *祝您閱讀愉快！如果有任何問題歡迎反饋 📖✨*

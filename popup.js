@@ -1,11 +1,13 @@
 let currentLanguage = 'zh'; // 預設語言為繁體中文
 let currentStyle = 'normal'; // 預設總結風格為標準摘要
+let currentModel = 'openai/gpt-oss-20b'; // 預設模型
 let summarizing = false; // 標記是否正在進行總結
 
 document.addEventListener('DOMContentLoaded', function () {
   // 獲取 DOM 元素
   const languageSelect = document.getElementById('language-select');
-  const styleSelect = document.getElementById('style-select'); // 新增
+  const styleSelect = document.getElementById('style-select');
+  const modelSelect = document.getElementById('model-select'); // 新增
   const summarizeBtn = document.getElementById('summarize-btn');
   const copyBtn = document.getElementById('copy-btn');
   const clearSummaryBtn = document.getElementById('clear-summary-btn'); // 新增
@@ -23,10 +25,17 @@ document.addEventListener('DOMContentLoaded', function () {
   const historyList = document.getElementById('history-list');
   const closeHistoryBtn = document.getElementById('close-history');
   const historyTitle = document.getElementById('history-title');
+  const exportHistoryBtn = document.getElementById('export-history');
+  const clearHistoryBtn = document.getElementById('clear-history');
 
   // 統計相關 DOM
   const statsDiv = document.getElementById('stats');
   const statsText = document.getElementById('stats-text');
+
+  // 主題切換相關 DOM
+  const themeToggle = document.getElementById('theme-toggle');
+  const textColorPicker = document.getElementById('text-color-picker');
+  const bgColorPicker = document.getElementById('bg-color-picker');
 
   let rawSummary = ''; // 儲存原始 Markdown 文本
 
@@ -37,7 +46,36 @@ document.addEventListener('DOMContentLoaded', function () {
   }
 
   // 載入之前的狀態
-  chrome.storage.local.get(['language', 'summary', 'apiKey', 'style', 'pendingSelection', 'pendingTitle'], function (result) {
+  chrome.storage.local.get(['language', 'summary', 'apiKey', 'style', 'pendingSelection', 'pendingTitle', 'theme', 'model', 'textColor', 'customBgColor'], function (result) {
+    // 處理字體顏色
+    if (result.textColor) {
+      document.documentElement.style.setProperty('--text-color', result.textColor);
+      textColorPicker.value = result.textColor;
+    }
+    // 處理自定義背景色
+    if (result.customBgColor) {
+      document.documentElement.style.setProperty('--bg-color', result.customBgColor);
+      bgColorPicker.value = result.customBgColor;
+    }
+    // 處理主題
+    let themeToUse = result.theme;
+    if (!themeToUse) {
+      if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+        themeToUse = 'dark';
+      } else {
+        themeToUse = 'light';
+      }
+    }
+    document.documentElement.setAttribute('data-theme', themeToUse);
+
+    // 設定 picker 預設值 (如果沒有自定義)
+    if (!result.textColor) {
+      textColorPicker.value = themeToUse === 'dark' ? '#e0e0e0' : '#333333';
+    }
+    if (!result.customBgColor) {
+      bgColorPicker.value = themeToUse === 'dark' ? '#1e1e1e' : '#ffffff';
+    }
+
     if (result.language) {
       currentLanguage = result.language; // 設定當前語言
       languageSelect.value = currentLanguage; // 更新語言選擇器的值
@@ -45,6 +83,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (result.style) {
       currentStyle = result.style; // 設定當前風格
       styleSelect.value = currentStyle; // 更新風格選擇器的值
+    }
+    if (result.model) {
+      currentModel = result.model; // 設定當前模型
+      modelSelect.value = currentModel; // 更新模型選擇器的值
     }
 
     // 如果有背景選取的內容，優先處理
@@ -95,6 +137,12 @@ document.addEventListener('DOMContentLoaded', function () {
     updateLanguage(); // 更新相關 UI (如果需要)
   });
 
+  // 模型選擇器變更事件
+  modelSelect.addEventListener('change', function () {
+    currentModel = this.value; // 更新當前模型
+    chrome.storage.local.set({ model: currentModel }); // 保存模型設定
+  });
+
   // 總結按鈕點擊事件
   summarizeBtn.addEventListener('click', summarize);
 
@@ -129,6 +177,66 @@ document.addEventListener('DOMContentLoaded', function () {
   // 關閉歷史紀錄
   closeHistoryBtn.addEventListener('click', function () {
     historyPanel.classList.add('hidden');
+  });
+
+  // 字體顏色切換事件
+  textColorPicker.addEventListener('input', function () {
+    const newColor = this.value;
+    document.documentElement.style.setProperty('--text-color', newColor);
+    chrome.storage.local.set({ textColor: newColor });
+  });
+
+  // 背景色切換事件
+  bgColorPicker.addEventListener('input', function () {
+    const newColor = this.value;
+    document.documentElement.style.setProperty('--bg-color', newColor);
+    chrome.storage.local.set({ customBgColor: newColor });
+  });
+
+  // 匯出歷史紀錄
+  exportHistoryBtn.addEventListener('click', function () {
+    chrome.storage.local.get(['history'], function (result) {
+      const history = result.history || [];
+      if (history.length === 0) {
+        alert(currentLanguage === 'zh' ? '尚無紀錄可匯出' : 'No history to export');
+        return;
+      }
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(history, null, 2));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", `webspeedreader_history_${new Date().getTime()}.json`);
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    });
+  });
+
+  // 清空歷史紀錄
+  clearHistoryBtn.addEventListener('click', function () {
+    const confirmMsg = currentLanguage === 'zh' ? '確定要清空所有歷史紀錄嗎？' : 'Are you sure you want to clear all history?';
+    if (confirm(confirmMsg)) {
+      chrome.storage.local.set({ history: [] }, function () {
+        renderHistory();
+      });
+    }
+  });
+
+  // 主題切換事件
+  themeToggle.addEventListener('click', function () {
+    const currentTheme = document.documentElement.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', newTheme);
+    chrome.storage.local.set({ theme: newTheme });
+
+    // 切換主題時，重置所有自定義顏色，以免混淆
+    chrome.storage.local.remove(['textColor', 'customBgColor', 'accentColor']);
+    document.documentElement.style.removeProperty('--text-color');
+    document.documentElement.style.removeProperty('--bg-color');
+    document.documentElement.style.removeProperty('--accent-color');
+
+    // 重置選擇器的顯示值
+    textColorPicker.value = newTheme === 'dark' ? '#e0e0e0' : '#333333';
+    bgColorPicker.value = newTheme === 'dark' ? '#1e1e1e' : '#ffffff';
   });
 
   // 保存 groq API Key 按鈕點擊事件
@@ -249,7 +357,7 @@ document.addEventListener('DOMContentLoaded', function () {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify({
-          model: "openai/gpt-oss-20b",
+          model: currentModel,
           messages: [{ role: "user", content: prompt }],
           stream: true
         })
@@ -360,18 +468,40 @@ document.addEventListener('DOMContentLoaded', function () {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'history-item';
         itemDiv.innerHTML = `
-          <div class="history-item-title">${item.title}</div>
-          <div class="history-item-meta">
-            <span>${item.date}</span>
+          <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+            <div style="flex: 1; overflow: hidden;">
+              <div class="history-item-title">${item.title}</div>
+              <div class="history-item-meta">
+                <span>${item.date}</span>
+              </div>
+            </div>
+            <button class="delete-item-btn" data-index="${index}" title="${currentLanguage === 'zh' ? '刪除' : 'Delete'}" style="background:none; border:none; padding: 4px; cursor: pointer; opacity: 0.5;">✕</button>
           </div>
         `;
-        itemDiv.addEventListener('click', () => {
+
+        // 點擊載入歷史
+        itemDiv.addEventListener('click', (e) => {
+          if (e.target.classList.contains('delete-item-btn')) return;
           rawSummary = item.summary;
           summaryDiv.innerHTML = marked.parse(rawSummary);
-          historyPanel.classList.add('hidden');
-          // 保存為當前總結，方便重新整理後還在
           chrome.storage.local.set({ summary: rawSummary });
+          historyPanel.classList.add('hidden');
+          // 滾動到頂部
+          window.scrollTo(0, 0);
         });
+
+        // 單筆刪除邏輯
+        const deleteBtn = itemDiv.querySelector('.delete-item-btn');
+        deleteBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const targetIndex = parseInt(deleteBtn.getAttribute('data-index'));
+          const newHistory = [...history];
+          newHistory.splice(targetIndex, 1);
+          chrome.storage.local.set({ history: newHistory }, function () {
+            renderHistory();
+          });
+        });
+
         historyList.appendChild(itemDiv);
       });
     });

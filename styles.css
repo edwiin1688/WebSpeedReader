@@ -1,29 +1,88 @@
-body {
-  width: 350px;
-  padding: 12px;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  color: #333;
+:root {
+  --bg-color: #ffffff;
+  --text-color: #333333;
+  --secondary-text-color: #666666;
+  --border-color: #dddddd;
+  --item-bg-hover: #f0f7f0;
+  --panel-bg: #ffffff;
+  --header-bg: #fcfcfc;
+  --divider-color: #eeeeee;
+  --input-bg: #ffffff;
+  --select-bg: #f9f9f9;
+  --stats-bg: #f0f7ff;
+  --stats-text: #1565C0;
+  --stats-border: #2196F3;
+  --code-bg: #f4f4f4;
+  --accent-color: #4CAF50;
 }
 
-/* 設定 header 區域的排版和底部邊距 */
-.header {
+[data-theme="dark"] {
+  --bg-color: #1e1e1e;
+  --text-color: #e0e0e0;
+  --secondary-text-color: #aaaaaa;
+  --border-color: #444444;
+  --item-bg-hover: #2d2d2d;
+  --panel-bg: #252525;
+  --header-bg: #2d2d2d;
+  --divider-color: #333333;
+  --input-bg: #2d2d2d;
+  --select-bg: #333333;
+  --stats-bg: #1a237e33;
+  --stats-text: #64b5f6;
+  --stats-border: #1976D2;
+  --code-bg: #2d2d2d;
+}
+
+body {
+  width: 400px;
+  padding: 12px;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* 設定標題容器區域的排版 */
+.header-container {
   display: flex;
-  gap: 6px;
-  justify-content: space-between;
+  flex-direction: column;
+  gap: 10px;
   margin-bottom: 15px;
 }
 
+.config-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.config-bar select {
+  flex: 1;
+}
+
+.action-bar {
+  display: flex;
+  gap: 6px;
+}
+
+.action-bar .btn {
+  flex: 1;
+  text-align: center;
+  white-space: nowrap;
+}
+
 select {
-  padding: 4px 6px;
+  padding: 6px 8px;
   border-radius: 4px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   font-size: 12px;
-  background-color: #f9f9f9;
+  background-color: var(--select-bg);
+  color: var(--text-color);
   cursor: pointer;
 }
 
 select:hover {
-  border-color: #4CAF50;
+  border-color: var(--accent-color);
 }
 
 /* 設定按鈕的內邊距和游標樣式 */
@@ -34,123 +93,208 @@ select:hover {
   font-size: 12px;
   font-weight: 500;
   transition: all 0.2s;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  border: 1px solid var(--text-color);
+}
+
+.btn-icon {
+  background: none;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: background 0.2s;
+  color: var(--text-color);
+}
+
+.btn-icon:hover {
+  background-color: var(--item-bg-hover);
+}
+
+.color-pickers {
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+
+#text-color-picker,
+#bg-color-picker {
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  cursor: pointer;
+  background: none;
+  overflow: hidden;
+}
+
+#text-color-picker::-webkit-color-swatch-wrapper,
+#bg-color-picker::-webkit-color-swatch-wrapper {
+  padding: 0;
+}
+
+#text-color-picker::-webkit-color-swatch,
+#bg-color-picker::-webkit-color-swatch {
+  border: 1px solid var(--border-color);
+  border-radius: 50%;
 }
 
 .btn:hover {
-  opacity: 0.9;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  opacity: 0.8;
+  background-color: var(--text-color);
+  color: var(--bg-color);
+  /* Hover 時反轉顏色 */
 }
 
-/* 設定 summarize 按鈕的背景色、文字顏色和邊框 */
+/* =========================================
+   核心功能按鈕 - 獨立配色區
+   ========================================= */
+
+/* 總結 - 綠色 */
 #summarize-btn {
   background-color: #4CAF50;
   color: white;
-  border: none;
+  border: 1px solid transparent;
 }
 
-/* 設定 summarize 按鈕在禁用狀態下的樣式 */
+#summarize-btn:hover {
+  background-color: #43A047;
+  color: white;
+}
+
 #summarize-btn:disabled {
   background-color: #cccccc;
   cursor: not-allowed;
   box-shadow: none;
 }
 
-/* 設定 message 區域的底部邊距 */
-#message {
-  margin-bottom: 10px;
+/* 歷史 - 橘色 */
+#history-btn {
+  background-color: #FF9800;
+  color: white;
+  border: 1px solid transparent;
 }
 
-/* 設定 summary 區域的換行和單詞換行樣式 */
+#history-btn:hover {
+  background-color: #FB8C00;
+  color: white;
+}
+
+/* 複製 - 藍色 */
+#copy-btn {
+  background-color: #2196F3;
+  color: white;
+  border: 1px solid transparent;
+}
+
+#copy-btn:hover {
+  background-color: #1E88E5;
+  color: white;
+}
+
+/* 清除摘要 - 紅色 */
+#clear-summary-btn {
+  background-color: #f44336;
+  color: white;
+  border: 1px solid transparent;
+}
+
+#clear-summary-btn:hover {
+  background-color: #D32F2F;
+  color: white;
+}
+
+/* ========================================= */
+
+#message {
+  margin-bottom: 10px;
+  color: var(--text-color);
+  opacity: 0.8;
+}
+
+/* 設定 summary 區域的樣式 */
 #summary {
   word-wrap: break-word;
   line-height: 1.6;
   font-size: 14px;
+  color: var(--text-color);
 }
 
 #summary h1,
 #summary h2,
 #summary h3 {
-  margin-top: 1em;
-  margin-bottom: 0.5em;
-}
-
-#summary ul,
-#summary ol {
-  padding-left: 20px;
-}
-
-#summary p {
-  margin-bottom: 0.8em;
+  color: var(--text-color);
 }
 
 #summary code {
-  background-color: #f4f4f4;
+  background-color: var(--code-bg);
   padding: 2px 4px;
   border-radius: 4px;
   font-family: monospace;
 }
 
-/* 設定 groq API Key 輸入區域的頂部邊距與佈局 */
 #api-key-input {
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
   padding-bottom: 8px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--divider-color);
 }
 
-/* 設定 groq API Key 輸入框的寬度和樣式 */
 #api-key {
   flex-grow: 1;
   margin-right: 5px;
   padding: 4px 8px;
   font-size: 11px;
-  border: 1px solid #ddd;
+  border: 1px solid var(--border-color);
   border-radius: 4px;
+  background-color: var(--input-bg);
+  color: var(--text-color);
 }
 
 #api-key-hint {
   font-size: 10px;
-  color: #666;
+  color: var(--text-color);
+  opacity: 0.6;
   margin-right: 5px;
   line-height: 24px;
 }
 
+/* API Key 保存按鈕 - 低調處理 */
 #save-api-key {
   padding: 4px 8px;
-  background-color: #f0f0f0;
-  color: #333;
-  border: 1px solid #ddd;
+  background-color: var(--select-bg);
+  color: var(--text-color);
+  border: 1px solid var(--border-color);
   border-radius: 4px;
 }
 
-/* 設定 clear 按鈕的背景色、文字顏色和邊框 */
-#clear-summary-btn {
-  background-color: #f44336;
-  color: white;
-  border: none;
+#save-api-key:hover {
+  background-color: var(--item-bg-hover);
+  color: var(--text-color);
 }
 
-/* 隱藏元素 */
 .hidden {
   display: none !important;
 }
 
-/* 載入動畫樣式 */
 #loading {
   display: flex;
   align-items: center;
   justify-content: center;
   margin-top: 20px;
-  color: #666;
+  color: var(--text-color);
   font-size: 13px;
 }
 
 .spinner {
   width: 16px;
   height: 16px;
-  border: 2px solid #f3f3f3;
-  border-top: 2px solid #4CAF50;
+  border: 2px solid var(--divider-color);
+  border-top: 2px solid var(--accent-color);
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin-right: 8px;
@@ -166,15 +310,14 @@ select:hover {
   }
 }
 
-/* 統計資訊顯示樣式 */
 #stats {
   margin: 12px 0;
   padding: 8px 12px;
-  background-color: #f0f7ff;
-  border-left: 4px solid #2196F3;
+  background-color: var(--stats-bg);
+  border-left: 4px solid var(--stats-border);
   border-radius: 4px;
   font-size: 11px;
-  color: #1565C0;
+  color: var(--stats-text);
   display: flex;
   align-items: center;
   animation: fadeIn 0.5s ease-out;
@@ -192,17 +335,12 @@ select:hover {
   }
 }
 
-/* 總結區域打字效果輔助樣式 */
-#summary {
-  position: relative;
-}
-
 #summary:not(:empty)::after {
   content: "▊";
   display: inline-block;
   vertical-align: middle;
   animation: blink 1s step-end infinite;
-  color: #4CAF50;
+  color: var(--accent-color);
   margin-left: 2px;
 }
 
@@ -218,49 +356,58 @@ select:hover {
   }
 }
 
-/* 設定 copy 按鈕的背景色、文字顏色和邊框 */
-#copy-btn {
-  background-color: #2196F3;
-  color: white;
-  border: none;
-}
-
-/* 歷史紀錄按鈕樣式 */
-#history-btn {
-  background-color: #FF9800;
-  color: white;
-  border: none;
-}
-
-/* 歷史紀錄面版樣式 */
 #history-panel {
-  background-color: #fff;
-  border: 1px solid #ddd;
+  background-color: var(--panel-bg);
+  border: 1px solid var(--border-color);
   border-radius: 8px;
   position: absolute;
-  top: 50px;
+  top: 90px;
   left: 12px;
   right: 12px;
   max-height: 400px;
   z-index: 100;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
 }
 
 .history-header {
   padding: 10px 12px;
-  border-bottom: 1px solid #eee;
+  border-bottom: 1px solid var(--divider-color);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #fcfcfc;
+  background-color: var(--header-bg);
   border-radius: 8px 8px 0 0;
+}
+
+.history-actions {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.btn-icon-small {
+  background: none;
+  border: none;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+  color: var(--text-color);
+}
+
+.btn-icon-small:hover {
+  opacity: 1;
+  background-color: var(--item-bg-hover);
 }
 
 #history-title {
   font-weight: bold;
   font-size: 14px;
+  color: var(--text-color);
 }
 
 .btn-small {
@@ -268,11 +415,11 @@ select:hover {
   border: none;
   font-size: 16px;
   cursor: pointer;
-  color: #999;
+  color: var(--secondary-text-color);
 }
 
 .btn-small:hover {
-  color: #333;
+  color: var(--text-color);
 }
 
 #history-list {
@@ -283,12 +430,12 @@ select:hover {
 .history-item {
   padding: 10px 12px;
   cursor: pointer;
-  border-bottom: 1px solid #f5f5f5;
+  border-bottom: 1px solid var(--divider-color);
   transition: background 0.2s;
 }
 
 .history-item:hover {
-  background-color: #f0f7f0;
+  background-color: var(--item-bg-hover);
 }
 
 .history-item:last-child {
@@ -302,11 +449,12 @@ select:hover {
   overflow: hidden;
   text-overflow: ellipsis;
   margin-bottom: 3px;
+  color: var(--text-color);
 }
 
 .history-item-meta {
   font-size: 11px;
-  color: #888;
+  color: var(--secondary-text-color);
   display: flex;
   justify-content: space-between;
 }
@@ -317,23 +465,24 @@ select:hover {
 }
 
 #history-list::-webkit-scrollbar-track {
-  background: #f1f1f1;
+  background: var(--bg-color);
 }
 
 #history-list::-webkit-scrollbar-thumb {
-  background: #ccc;
+  background: var(--border-color);
   border-radius: 3px;
 }
 
 #history-list::-webkit-scrollbar-thumb:hover {
-  background: #bbb;
+  background: var(--secondary-text-color);
 }
 
 /* 版本號顯示樣式 */
 #version-info {
   text-align: right;
   font-size: 10px;
-  color: #ccc;
+  color: var(--text-color);
+  opacity: 0.4;
   margin-top: 10px;
   font-family: monospace;
 }
