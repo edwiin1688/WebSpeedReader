@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **右鍵選單總結**: 新增右鍵選單 `總結選取內容`，選取文字後可快速匯入彈窗進行總結。
 - **歷史紀錄 (History)**: 支援保存最近 10 次總結，包含網頁標題與時間戳記，點擊即可重載內容。
 - **自定義總結風格**: 新增選擇器，支援「標準摘要」、「簡明模式 (3個重點)」與「深度解析」三種風格。
 - **UI 佈局優化**: 擴大插槽寬度至 350px，並美化按鈕與下拉選單的視覺質感（圓角、過渡效果）。
@@ -20,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - 修復了在切換語言時，部分 UI 元素未同步更新的問題。
 
 ### Changed
+- 將模型更新為 `openai/gpt-oss-20b` 以優化生成速度與穩定性。
 - 優化 API Key 顯示邏輯：支援最後 3 字元即時校驗。
 - 將 API Key 輸入框移至頂部並優化佈局，提升易用性。
 - 將 API Key 輸入框類型改為 `password` 以增強隱私安全性。

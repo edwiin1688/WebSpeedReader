@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', function () {
   let rawSummary = ''; // 儲存原始 Markdown 文本
 
   // 載入之前的狀態
-  chrome.storage.local.get(['language', 'summary', 'apiKey'], function (result) {
+  chrome.storage.local.get(['language', 'summary', 'apiKey', 'style', 'pendingSelection', 'pendingTitle'], function (result) {
     if (result.language) {
       currentLanguage = result.language; // 設定當前語言
       languageSelect.value = currentLanguage; // 更新語言選擇器的值
@@ -36,10 +36,20 @@ document.addEventListener('DOMContentLoaded', function () {
       currentStyle = result.style; // 設定當前風格
       styleSelect.value = currentStyle; // 更新風格選擇器的值
     }
-    if (result.summary) {
+
+    // 如果有背景選取的內容，優先處理
+    if (result.pendingSelection) {
+      const selectedText = result.pendingSelection;
+      const selectedTitle = result.pendingTitle || "選取內容總結";
+      // 清除 pending，避免下次開啟又是同一個
+      chrome.storage.local.remove(['pendingSelection', 'pendingTitle']);
+      // 自動觸發總結
+      summarize(selectedText, selectedTitle);
+    } else if (result.summary) {
       rawSummary = result.summary;
       summaryDiv.innerHTML = marked.parse(rawSummary); // 顯示之前的總結（渲染後）
     }
+
     if (result.apiKey) {
       apiKeyInput.value = result.apiKey; // 顯示之前保存的 groq API Key
       updateApiKeyHint(result.apiKey);
@@ -149,8 +159,8 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   }
 
-  // 總結功能
-  async function summarize() {
+  // 總結功能 (支援傳入特定內容)
+  async function summarize(forcedContent = null, forcedTitle = null) {
     if (summarizing) return; // 如果正在總結，則返回
     summarizing = true; // 標記為正在總結
     summarizeBtn.disabled = true; // 禁用總結按鈕
@@ -158,18 +168,30 @@ document.addEventListener('DOMContentLoaded', function () {
     rawSummary = ''; // 重置原始文本
 
     try {
-      // 獲取當前活動標籤頁
-      const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+      let pageContent = "";
+      let tabTitle = "";
+      let tabUrl = "";
 
-      // 確認內容腳本已加載
-      await chrome.scripting.executeScript({
-        target: { tabId: tab.id },
-        files: ['readability.js', 'content.js']
-      });
+      if (forcedContent) {
+        pageContent = forcedContent;
+        tabTitle = forcedTitle || "選取內容";
+        tabUrl = ""; // 選取內容可能無 URL 或不重要
+      } else {
+        // 獲取當前活動標籤頁
+        const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
+        tabTitle = tab.title;
+        tabUrl = tab.url;
 
-      // 向內容腳本發送訊息以獲取頁面內容
-      const pageContentResponse = await chrome.tabs.sendMessage(tab.id, { action: "getPageContent" });
-      const pageContent = pageContentResponse.content;
+        // 確認內容腳本已加載
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id },
+          files: ['readability.js', 'content.js']
+        });
+
+        // 向內容腳本發送訊息以獲取頁面內容
+        const pageContentResponse = await chrome.tabs.sendMessage(tab.id, { action: "getPageContent" });
+        pageContent = pageContentResponse.content;
+      }
 
       // 獲取保存的 groq API Key
       const apiKey = await new Promise((resolve) => {
@@ -256,7 +278,7 @@ document.addEventListener('DOMContentLoaded', function () {
       // 保存總結結果
       chrome.storage.local.set({ summary: rawSummary });
       // 儲存到歷史紀錄
-      saveToHistory(rawSummary, tab.title, tab.url);
+      saveToHistory(rawSummary, tabTitle, tabUrl);
     } catch (error) {
       console.error('Error:', error);
       summaryDiv.textContent = currentLanguage === 'zh' ? '總結時發生錯誤' : 'An error occurred during summarization'; // 顯示錯誤訊息
