@@ -102,7 +102,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
   // 載入之前的狀態
   chrome.storage.local.get(['language', 'summary', 'apiKey', 'style', 'pendingSelection', 'pendingTitle', 'theme', 'model', 'textColor', 'customBgColor', 'customPrompt'], async function (result) {
-    console.warn("🔍 [Popup] Storage 載入完成:", result); // Debug Log
+    console.log("🔍 [Popup] Storage 載入完成:", JSON.stringify(result, null, 2)); // Debug Log (可選)
     // 處理字體顏色
     if (result.textColor) {
       document.documentElement.style.setProperty('--text-color', result.textColor);
@@ -167,7 +167,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     if (result.pendingSelection) {
       // 來自右鍵選單的內容
       const selectedText = result.pendingSelection;
-      const selectedTitle = result.pendingTitle || "選取內容總結";
+      const selectedTitle = result.pendingTitle || t('ui.selectedContentSummary');
       // 清除 pending，避免和下一次開啟衝突
       chrome.storage.local.remove(['pendingSelection', 'pendingTitle']);
       // 自動觸發總結
@@ -460,24 +460,26 @@ document.addEventListener('DOMContentLoaded', async function () {
   function updateLanguage() {
     const styles = t('styles');
 
+    // 設定頁面標題
+    document.title = t('ui.appTitle');
+
     // 按鈕文字
-    summarizeBtn.textContent = t('ui.summarize');
-    copyBtn.textContent = t('ui.copy');
-    historyBtn.textContent = t('ui.history');
-    clearSummaryBtn.textContent = t('ui.clear');
-    saveApiKeyBtn.textContent = t('ui.save');
-    messageDiv.textContent = t('ui.message');
-    loadingText.textContent = t('ui.loading');
-    historyTitle.textContent = t('ui.historyTitle');
+    if (summarizeBtn) summarizeBtn.textContent = t('ui.summarize');
+    if (historyBtn) historyBtn.textContent = t('ui.history');
+    if (clearSummaryBtn) clearSummaryBtn.textContent = t('ui.clear');
+    if (saveApiKeyBtn) saveApiKeyBtn.textContent = t('ui.save');
+    if (messageDiv) messageDiv.textContent = t('ui.message');
+    if (loadingText) loadingText.textContent = t('ui.loading');
+    if (historyTitle) historyTitle.textContent = t('ui.historyTitle');
 
     // Title 屬性
-    themeToggle.setAttribute('title', t('ui.themeToggle'));
-    textColorPicker.setAttribute('title', t('ui.customTextColor'));
-    bgColorPicker.setAttribute('title', t('ui.customBgColor'));
-    copyBtn.setAttribute('title', t('ui.copyMarkdown'));
-    ttsBtn.setAttribute('title', t('ui.readAloud'));
-    exportHistoryBtn.setAttribute('title', t('ui.exportHistory'));
-    clearHistoryBtn.setAttribute('title', t('ui.clearHistory'));
+    if (themeToggle) themeToggle.setAttribute('title', t('ui.themeToggle'));
+    if (textColorPicker) textColorPicker.setAttribute('title', t('ui.customTextColor'));
+    if (bgColorPicker) bgColorPicker.setAttribute('title', t('ui.customBgColor'));
+    if (copyBtn) copyBtn.setAttribute('title', t('ui.copyMarkdown'));
+    if (ttsBtn) ttsBtn.setAttribute('title', t('ui.readAloud'));
+    if (exportHistoryBtn) exportHistoryBtn.setAttribute('title', t('ui.exportHistory'));
+    if (clearHistoryBtn) clearHistoryBtn.setAttribute('title', t('ui.clearHistory'));
 
     // 進階設定
     if (advancedSummary) {
@@ -494,7 +496,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     }
 
     // Placeholder
-    if (Array.isArray(styles)) {
+    if (styleSelect && Array.isArray(styles) && styles.length >= 4) {
       styleSelect.options[0].text = styles[0];
       styleSelect.options[1].text = styles[1];
       styleSelect.options[2].text = styles[2];
@@ -521,7 +523,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
       if (forcedContent) {
         pageContent = forcedContent;
-        tabTitle = forcedTitle || "選取內容";
+        tabTitle = forcedTitle || t('ui.selectedContent');
         tabUrl = ""; // 選取內容可能無 URL 或不重要
       } else {
         const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });

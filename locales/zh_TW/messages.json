@@ -22,7 +22,10 @@
         "aiModel": "AI 模型:",
         "apiKey": "API Key:",
         "maxTokens": "Max Tokens:",
-        "maxTokensPlaceholder": "預設 (例如 2048)"
+        "maxTokensPlaceholder": "預設 (例如 2048)",
+        "selectedContentSummary": "選取內容總結",
+        "selectedContent": "選取內容",
+        "appTitle": "網頁快速閱讀助手"
     },
     "styles": [
         "標準摘要",

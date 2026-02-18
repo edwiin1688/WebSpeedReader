@@ -22,7 +22,10 @@
         "aiModel": "AI モデル:",
         "apiKey": "API キー:",
         "maxTokens": "最大トークン数:",
-        "maxTokensPlaceholder": "デフォルト (例: 2048)"
+        "maxTokensPlaceholder": "デフォルト (例: 2048)",
+        "selectedContentSummary": "選択されたコンテンツの要約",
+        "selectedContent": "選択されたコンテンツ",
+        "appTitle": "ウェブ高速読取アシスタント"
     },
     "styles": [
         "標準",

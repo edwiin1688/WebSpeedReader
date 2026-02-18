@@ -3,7 +3,7 @@
 
 <head>
   <meta charset="UTF-8">
-  <title>網頁快速閱讀助手</title>
+  <title></title>
   <!-- 引入樣式表 -->
   <link rel="stylesheet" type="text/css" href="styles.css">
 </head>
@@ -13,10 +13,10 @@
     <div class="header-container">
       <!-- 第一行：配置列 -->
       <div class="config-bar">
-        <button id="theme-toggle" class="btn-icon" title="切換主題">🌓</button>
+        <button id="theme-toggle" class="btn-icon">🌓</button>
         <div class="color-pickers">
-          <input type="color" id="text-color-picker" title="自定義字體顏色" value="#333333">
-          <input type="color" id="bg-color-picker" title="自定義背景色" value="#ffffff">
+          <input type="color" id="text-color-picker" value="#333333">
+          <input type="color" id="bg-color-picker" value="#ffffff">
         </div>
         <select id="language-select">
           <option value="zh">繁體中文</option>
@@ -28,10 +28,10 @@
           <option value="es">Español</option>
         </select>
         <select id="style-select">
-          <option value="normal">標準摘要</option>
-          <option value="concise">簡明模式</option>
-          <option value="detailed">深度解析</option>
-          <option value="custom">自定義指令</option>
+          <option value="normal"></option>
+          <option value="concise"></option>
+          <option value="detailed"></option>
+          <option value="custom"></option>
         </select>
 
       </div>
@@ -42,21 +42,21 @@
       </div>
 
       <div class="action-bar">
-        <button id="summarize-btn" class="btn">總結</button>
-        <button id="history-btn" class="btn">歷史</button>
-        <button id="copy-btn" title="複製 Markdown">
+        <button id="summarize-btn" class="btn"></button>
+        <button id="history-btn" class="btn"></button>
+        <button id="copy-btn">
           <svg viewBox="0 0 24 24">
             <path
               d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12V1zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11v14z" />
           </svg>
         </button>
-        <button id="tts-btn" title="朗讀總結">
+        <button id="tts-btn">
           <svg viewBox="0 0 24 24">
             <path
               d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
           </svg>
         </button>
-        <button id="clear-summary-btn" class="btn">清除</button>
+        <button id="clear-summary-btn" class="btn"></button>
       </div>
     </div>
 
@@ -105,10 +105,10 @@
     <!-- 歷史紀錄面版 -->
     <div id="history-panel" class="hidden">
       <div class="history-header">
-        <span id="history-title">最近總結</span>
+        <span id="history-title"></span>
         <div class="history-actions">
-          <button id="export-history" class="btn-icon-small" title="匯出總結 (JSON)">📥</button>
-          <button id="clear-history" class="btn-icon-small" title="清空紀錄">🗑️</button>
+          <button id="export-history" class="btn-icon-small">📥</button>
+          <button id="clear-history" class="btn-icon-small">🗑️</button>
           <button id="close-history" class="btn-small">✕</button>
         </div>
       </div>
@@ -116,7 +116,7 @@
     </div>
 
     <!-- 提示訊息區域 -->
-    <div id="message">請點擊"總結"按鈕開始總結當前頁面內容。</div>
+    <div id="message"></div>
 
 
 
@@ -129,7 +129,7 @@
     <!-- 載入動畫區域 -->
     <div id="loading" class="hidden">
       <div class="spinner"></div>
-      <span id="loading-text">正在思考...</span>
+      <span id="loading-text"></span>
     </div>
 
 

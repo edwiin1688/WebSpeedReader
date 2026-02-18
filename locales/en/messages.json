@@ -22,7 +22,10 @@
         "aiModel": "AI Model:",
         "apiKey": "API Key:",
         "maxTokens": "Max Tokens:",
-        "maxTokensPlaceholder": "Default (e.g. 2048)"
+        "maxTokensPlaceholder": "Default (e.g. 2048)",
+        "selectedContentSummary": "Selected Content Summary",
+        "selectedContent": "Selected Content",
+        "appTitle": "WebSpeedReader"
     },
     "styles": [
         "Normal",
